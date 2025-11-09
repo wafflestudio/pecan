@@ -1,0 +1,23 @@
+# /toolchains/c/manifest.yaml
+
+language: c
+version: "system"
+method: apt
+install_prefix: "/opt/toolchains/c/system"
+
+apt:
+  packages:
+    - "build-essential"
+    - "gcc"
+    - "libc6-dev"
+    - "binutils"
+
+binaries:
+  - "/usr/bin/gcc"
+
+set_default: true
+alternatives:
+  name: gcc
+  links:
+    gcc: "/usr/bin/gcc"
+    cc: "/usr/bin/gcc"

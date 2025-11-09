@@ -1,0 +1,24 @@
+language: typescript
+version: "5.6.3"
+method: tarball
+install_prefix: "/opt/toolchains/typescript/5.6.3"
+
+artifact_template:
+  url: "https://registry.npmjs.org/typescript/-/typescript-{{version}}.tgz"
+  sha256: "ef67f8d8ad895858024b7339d3e34bf112cae3c5db1f538c3079038b17ae30fa"
+
+binaries:
+  - "bin/tsc"
+  - "bin/tsserver"
+
+set_default: true
+alternatives:
+  name: typescript
+  links:
+    tsc: "bin/tsc"
+    tsserver: "bin/tsserver"
+
+runtime_env:
+  PATH_prepend:
+    - "/opt/toolchains/typescript/current/bin"
+    - "/opt/toolchains/node/current/bin"

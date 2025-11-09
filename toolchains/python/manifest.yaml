@@ -1,0 +1,29 @@
+# /toolchains/python/manifest.yaml
+
+language: python
+version: "3.12.7"
+method: build
+install_prefix: "/opt/toolchains/python/3.12.7"
+
+build:
+  url: "https://www.python.org/ftp/python/{{version}}/Python-{{version}}.tgz"
+  sha256: "73ac8fe780227bf371add8373c3079f42a0dc62deff8d612cd15a618082ab623"
+  configure_args:
+    - "--prefix={{install_prefix}}"
+    - "--enable-optimizations"
+    - "--with-lto"
+
+binaries:
+  - "bin/python3"
+  - "bin/pip3"
+
+set_default: true
+alternatives:
+  name: python3
+  links:
+    python3: "bin/python3"
+    pip3: "bin/pip3"
+
+runtime_env:
+  PATH_prepend:
+    - "/opt/toolchains/python/current/bin"

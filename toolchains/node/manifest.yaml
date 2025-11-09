@@ -1,0 +1,30 @@
+# /toolchains/node/manifest.yaml
+
+language: node
+version: "20.18.0"
+method: tarball
+install_prefix: "/opt/toolchains/node/20.18.0"
+
+artifact_template:
+  url: "https://nodejs.org/dist/v{{version}}/node-v{{version}}-{{os}}-{{node_arch}}.tar.xz"
+  sha256_by_arch:
+    x64: "4543670b589593f8fa5f106111fd5139081da42bb165a9239f05195e405f240a"
+    arm64: "a9ce85675ba33f00527f6234d90000946c0936fb4fca605f1891bb5f4fe6fb0a"
+    armv7l: "964110a031c467a555aa889a6f2f13f7a1d5d4b834403aaa6d9148de050e1563"
+
+binaries:
+  - "bin/node"
+  - "bin/npm"
+  - "bin/npx"
+
+set_default: true
+alternatives:
+  name: node
+  links:
+    node: "bin/node"
+    npm:  "bin/npm"
+    npx:  "bin/npx"
+
+runtime_env:
+  PATH_prepend:
+    - "/opt/toolchains/node/current/bin"

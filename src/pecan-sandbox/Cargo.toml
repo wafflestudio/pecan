@@ -1,0 +1,22 @@
+[package]
+name = "pecan-sandbox"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+license.workspace = true
+
+[dependencies]
+uuid.workspace = true
+tokio-util = "0.7"
+tokio.workspace = true
+thiserror.workspace = true
+dashmap = "6.1.0"
+futures = "0.3.31"
+
+[features]
+default = ["isolate"]
+isolate = []
+isolate-cg = []
+
+nsjail = []

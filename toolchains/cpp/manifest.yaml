@@ -1,0 +1,23 @@
+# /toolchains/cpp/manifest.yaml
+
+language: cpp
+version: "system"
+method: apt
+install_prefix: "/opt/toolchains/cpp/system"
+
+apt:
+  packages:
+    - "build-essential"
+    - "g++"
+    - "libstdc++-12-dev"
+    - "binutils"
+
+binaries:
+  - "/usr/bin/g++"
+
+set_default: true
+alternatives:
+  name: g++
+  links:
+    g++: "/usr/bin/g++"
+    c++: "/usr/bin/g++"

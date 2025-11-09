@@ -1,0 +1,14 @@
+[package]
+name = "pecan-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio.workspace = true
+tokio-util = "0.7"
+thiserror.workspace = true
+uuid.workspace = true
+pecan-sandbox = { path = "../pecan-sandbox" }

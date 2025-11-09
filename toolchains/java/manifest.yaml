@@ -1,0 +1,27 @@
+# /toolchains/java/manifest.yaml
+
+language: java
+version: "17"
+method: tarball
+install_prefix: "/opt/toolchains/java/17"
+
+artifact_template:
+  url: "https://corretto.aws/downloads/latest/amazon-corretto-{{version}}-{{java_arch}}-{{os}}-jdk.tar.gz"
+  sha256_by_arch:
+    x64: "ce991faba33be89046b03518e2c971f892a279570bc09f700b363282db1ac552"
+    aarch64: "31b08051e647044da8ea201744becdbc76e05b807d45e68636f765e15fd830ae"
+
+binaries:
+  - "bin/java"
+  - "bin/javac"
+
+set_default: true
+alternatives:
+  name: java
+  links:
+    java:  "bin/java"
+    javac: "bin/javac"
+
+runtime_env:
+  PATH_prepend:
+    - "/opt/toolchains/java/current/bin"

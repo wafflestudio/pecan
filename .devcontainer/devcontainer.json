@@ -1,0 +1,25 @@
+{
+  "name": "pecan",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,readonly=false,type=bind",
+  "overrideCommand": true,
+  "privileged": true,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "fill-labs.dependi",
+        "vadimcn.vscode-lldb"
+      ],
+      "settings": {
+        "rust-analyzer.rustfmt.extraArgs": ["+nightly"]
+      }
+    }
+  },
+  "postStartCommand": "/usr/local/bin/entrypoint.sh",
+  "appPort": ["17360:8080"]
+}

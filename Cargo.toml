@@ -1,0 +1,21 @@
+[workspace]
+resolver = "3"
+members = [
+    "src/pecan-api",
+    "src/pecan-core",
+    "src/pecan-sandbox",
+]
+
+[workspace.package]
+name = "pecan"
+version = "0.1.0"
+resolver = "3"
+edition = "2024"
+rust-version = "1.86.0"
+readme = "README.md"
+license = "Apache-2.0 OR MIT"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full", "macros", "rt-multi-thread"] }
+uuid = { version = "1.0", features = ["serde", "v4"] }
+thiserror = "2.0.17"

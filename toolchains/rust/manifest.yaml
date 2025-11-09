@@ -1,0 +1,25 @@
+language: rust
+version: "1.81.0"
+method: tarball
+install_prefix: "/opt/toolchains/rust/1.81.0"
+
+artifact_template:
+  url: "https://static.rust-lang.org/dist/rust-{{version}}-{{rust_arch_tag}}.tar.xz"
+  sha256_by_arch:
+    amd64: "1a9ee8caaa18a3e433fef93cea8a55dc1ebd478ed761b2fef69d4565f9d00e7f"
+    arm64: "5cd65b0a2724e4193a5c4ba79f0687f8c11d52c2d58ee35bc7ce5958a3cc8dc2"
+
+binaries:
+  - "bin/rustc"
+  - "bin/cargo"
+
+set_default: true
+alternatives:
+  name: rust
+  links:
+    rustc: "bin/rustc"
+    cargo: "bin/cargo"
+
+runtime_env:
+  PATH_prepend:
+    - "/opt/toolchains/rust/current/bin"

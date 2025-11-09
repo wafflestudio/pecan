@@ -1,0 +1,25 @@
+# /toolchains/kotlin/manifest.yaml
+
+language: kotlin
+version: "2.0.21"
+method: tarball
+install_prefix: "/opt/toolchains/kotlin/2.0.21"
+
+artifact_template:
+  url: "https://github.com/JetBrains/kotlin/releases/download/v{{version}}/kotlin-compiler-{{version}}.zip"
+  sha256: "0352c0a45bd22f80f6b26e485cd04da8047baa5de54865281fb9f89a4a7bcf2a"
+
+binaries:
+  - "kotlinc/bin/kotlinc"
+  - "kotlinc/bin/kotlin"
+
+set_default: true
+alternatives:
+  name: kotlin
+  links:
+    kotlinc: "kotlinc/bin/kotlinc"
+    kotlin: "kotlinc/bin/kotlin"
+
+runtime_env:
+  PATH_prepend:
+    - "/opt/toolchains/kotlin/current/kotlinc/bin"

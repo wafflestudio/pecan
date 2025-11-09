@@ -1,0 +1,5 @@
+newline_style = "Native"
+unstable_features = true 
+group_imports = "StdExternalCrate"
+imports_granularity = "Module"
+style_edition = "2024"

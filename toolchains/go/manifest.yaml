@@ -1,0 +1,25 @@
+language: go
+version: "1.23.3"
+method: tarball
+install_prefix: "/opt/toolchains/go/1.23.3"
+
+artifact_template:
+  url: "https://go.dev/dl/go{{version}}.{{os}}-{{go_arch}}.tar.gz"
+  sha256_by_arch:
+    amd64: "a0afb9744c00648bafb1b90b4aba5bdb86f424f02f9275399ce0c20b93a2c3a8"
+    arm64: "1f7cbd7f668ea32a107ecd41b6488aaee1f5d77a66efd885b175494439d4e1ce"
+
+binaries:
+  - "bin/go"
+  - "bin/gofmt"
+
+set_default: true
+alternatives:
+  name: go
+  links:
+    go: "bin/go"
+    gofmt: "bin/gofmt"
+
+runtime_env:
+  PATH_prepend:
+    - "/opt/toolchains/go/current/bin"
