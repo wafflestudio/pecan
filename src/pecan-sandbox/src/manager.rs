@@ -1,3 +1,6 @@
+//! Sandbox manager holds all initialized sandboxes, tracks their status,
+//! and stores actual tool information based on build configuration
+
 use std::process::Stdio;
 use std::sync::Arc;
 use std::time::Duration;
@@ -16,6 +19,7 @@ use crate::sandbox::{
 use crate::tools::common::ISandboxTool;
 use crate::tools::{SandboxTool, build_tool};
 
+/// adjust max value based on deployed environment
 pub const MAX_PREWARMED_SANDBOXES: usize = 1000;
 
 pub struct SandboxManager {
@@ -69,6 +73,11 @@ impl SandboxManager {
         self.sandboxes.iter().map(|e| *e.key()).collect()
     }
 
+    /// 1. claim an available sandbox from idle channel, mark it as running
+    /// 2. write files into sandbox working directory
+    /// 3. compile code if necessary, outside sandboxed environment
+    /// 4. execute and retrieve results
+    /// 5. mark sandbox as idle, return to idle queue
     pub async fn execute_via_manager(
         &self,
         options: &SandboxExecutionOptions,

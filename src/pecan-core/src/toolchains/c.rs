@@ -1,5 +1,8 @@
 //! C language toolchain
 //! check toolchains/c/manifest.yaml for more details
+//!
+//! Currently, C, C++ language toolchain is not valid due to complex system library dependency for libc.
+//! Just use gcc, g++ from apt install.
 
 use std::path::PathBuf;
 
