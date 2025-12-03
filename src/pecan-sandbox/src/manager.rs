@@ -2,7 +2,7 @@
 //! and stores actual tool information based on build configuration
 
 use std::process::Stdio;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 use dashmap::DashMap;
@@ -19,8 +19,21 @@ use crate::sandbox::{
 use crate::tools::common::ISandboxTool;
 use crate::tools::{SandboxTool, build_tool};
 
-/// adjust max value based on deployed environment
-pub const MAX_PREWARMED_SANDBOXES: usize = 1000;
+pub static MAX_PREWARMED_SANDBOXES: OnceLock<usize> = OnceLock::new();
+
+/// initialize manager config based on deployed environment
+fn init_manager_config() -> Result<(), SandboxManagerError> {
+    MAX_PREWARMED_SANDBOXES
+        .set(
+            std::env::var("MAX_PREWARMED_SANDBOXES")
+                .unwrap_or_else(|_| "1000".to_string())
+                .parse()
+                .unwrap(),
+        )
+        .map_err(|e| SandboxManagerError::InternalError(e.to_string()))?;
+
+    Ok(())
+}
 
 pub struct SandboxManager {
     pub tool: SandboxTool,
@@ -43,6 +56,8 @@ pub async fn create_sandbox(tool: &SandboxTool) -> Result<Arc<Sandbox>, SandboxM
 
 impl SandboxManager {
     pub async fn new(prewarm: usize) -> Result<Arc<Self>, SandboxManagerError> {
+        let _ = init_manager_config(); // ignore error
+
         let (tx, rx) = mpsc::unbounded_channel::<Uuid>();
         let map = DashMap::new();
         let tool = build_tool().map_err(|e| {
@@ -225,7 +240,8 @@ impl SandboxManager {
     }
 
     pub async fn add_new_prewarmed_sandbox(&self, num: usize) -> Result<(), SandboxManagerError> {
-        let target_num = num.min(MAX_PREWARMED_SANDBOXES - self.available_sandboxes_count().await);
+        let target_num = num
+            .min(MAX_PREWARMED_SANDBOXES.get().unwrap() - self.available_sandboxes_count().await);
 
         for _ in 0..target_num {
             let sb = create_sandbox(&self.tool)
