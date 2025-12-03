@@ -4,6 +4,7 @@ use crate::api::error::APIError;
 use crate::application::state::SharedState;
 use crate::domain::models::judge::{JudgeRequest, JudgeResponse, JudgeStatus};
 
+/// Process single judge request and returns judge response
 pub async fn judge(request: JudgeRequest, state: &SharedState) -> Result<JudgeResponse, APIError> {
     let service = &state.service;
     let result = service

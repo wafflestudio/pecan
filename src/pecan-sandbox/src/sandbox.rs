@@ -89,7 +89,7 @@ pub struct CompileOptions {
     pub args: Vec<String>,
 }
 
-// Options for mounting additional directories
+/// Options for mounting additional directories
 #[derive(Debug, Clone)]
 pub struct SandboxAdditionalDirectoryOptions {
     pub directory_path: PathBuf,

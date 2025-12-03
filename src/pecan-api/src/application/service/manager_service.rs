@@ -2,6 +2,7 @@ use crate::api::error::APIError;
 use crate::application::state::SharedState;
 use crate::domain::models::manager::SandboxStatusResponse;
 
+/// get detailed sandbox service status
 pub async fn get_sandbox_status(state: &SharedState) -> Result<SandboxStatusResponse, APIError> {
     let service = &state.service;
     let available_sandboxes_count = service.get_available_sandboxes_count().await;

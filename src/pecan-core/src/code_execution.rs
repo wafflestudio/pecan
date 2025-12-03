@@ -32,6 +32,7 @@ pub struct CodeExecutionResult {
     pub memory: f64,
 }
 
+/// simply execute function provided by sandbox manager
 pub async fn execute(
     sandbox_manager: &Arc<SandboxManager>,
     request: CodeExecutionRequest,

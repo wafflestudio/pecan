@@ -2,11 +2,9 @@ use pecan_api::application;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
+// API server entrypoint
 #[tokio::main]
 async fn main() {
-    // changed from dev
-    // pecan_sandbox::test_sandbox_manager().await;
-
     let filter_layer = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::try_new("info").unwrap());
     let fmt_layer = tracing_subscriber::fmt::layer()
