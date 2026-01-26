@@ -1,40 +1,31 @@
 # Contributing to Pecan
 
-Thank you for your interest in contributing!
-We welcome all kinds of contributions — bug reports, feature requests, documentation updates, and pull requests.
+We welcome contributions: bug reports, feature requests, documentation updates, and pull requests.
 
----
+## How to Contribute
 
-## 💡 How to Contribute
-
-1. **Fork** the repository and **clone** it locally:
-
+1. Fork and clone the repository:
    ```bash
    git clone https://github.com/wafflestudio/pecan.git
    cd pecan
    ```
 
-2. **Create a branch** for your changes:
-
+2. Create a branch:
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
-3. **Install dependencies** and **run tests** to make sure everything works:
+3. Install dependencies and run tests:
+   Rust is required. See [docs](./docs/dev-env-using-devcontainer.md) for setup.
 
-   You need Rust installed on your machine. For easy setup, check [docs](./docs/dev-env-using-devcontainer.md)
-
-4. **Commit** your changes using clear, descriptive messages:
-
+4. Commit changes with clear messages:
    ```bash
    git commit -m "feat: add new authentication flow"
    ```
 
-5. **Push** your branch and **open a Pull Request** on GitHub.
+5. Push and open a Pull Request on GitHub.
 
----
-
-## 🧭 Guidelines
+## Guidelines
 
 - Keep changes focused — one purpose per PR.
 - Follow existing code style and linting rules.
@@ -42,9 +33,11 @@ We welcome all kinds of contributions — bug reports, feature requests, documen
 - Update documentation if your change affects users or developers.
 - Reference related issues using `Closes #123` or `Fixes #456`.
 
----
+## AI Usage
 
-## 🧱 Commit Message Format (optional but recommended)
+Generative AI (LLM) tools may be used for documentation, but exercise caution when using them for code contributions. Review and verify all AI-generated code for correctness, security, and adherence to project standards before submitting.
+
+## Commit Message Format
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
@@ -54,8 +47,6 @@ fix: correct typo in README
 docs: update contributing guide
 ```
 
----
-
-## 📜 License
+## License
 
 By contributing, you agree that your contributions will be licensed under the same license as this project: **[MIT](./LICENSE-MIT)**, **[Apache 2.0](./LICENSE-APACHE)**

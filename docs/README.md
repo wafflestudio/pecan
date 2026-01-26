@@ -51,6 +51,7 @@ Pecan follows a layered architecture pattern, organized into three primary compo
 
 ## For developers
 
+- [API Reference](./api-reference.md)
 - [Build your own development environment using devcontainer](./dev-env-using-devcontainer.md)
 - [Deployment guide](./deployment-guide.md)
 
