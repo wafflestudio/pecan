@@ -299,3 +299,69 @@ fn parse_meta_file<S: FromStr>(content: &str, key: &str, default: S) -> S {
         .flatten()
         .unwrap_or(default)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::SandboxToolIsolate;
+    use crate::tools::common::ISandboxTool;
+    use std::collections::HashSet;
+    use tokio::process::Command;
+
+    #[tokio::test]
+    async fn isolate_build_and_destroy_releases_box_id() {
+        let isolate_ready = Command::new("isolate")
+            .arg("--version")
+            .output()
+            .await
+            .is_ok();
+        if !isolate_ready {
+            eprintln!("Skipping isolate test: isolate binary not available");
+            return;
+        }
+
+        let tool = SandboxToolIsolate::new();
+        let inner = tool.build_inner().await.expect("build inner");
+        let initial_pool_len = tool.get_box_id_pool_len();
+
+        tool.destroy_inner(&inner).await.expect("destroy inner");
+
+        assert_eq!(tool.get_box_id_pool_len(), initial_pool_len + 1);
+    }
+
+    #[tokio::test]
+    async fn isolate_multiple_boxes_create_and_destroy() {
+        let isolate_ready = Command::new("isolate")
+            .arg("--version")
+            .output()
+            .await
+            .is_ok();
+        if !isolate_ready {
+            eprintln!("Skipping isolate test: isolate binary not available");
+            return;
+        }
+
+        let tool = SandboxToolIsolate::new();
+        let initial_pool_len = tool.get_box_id_pool_len();
+
+        let mut inners = Vec::new();
+        for _ in 0..3 {
+            inners.push(tool.build_inner().await.expect("build inner"));
+        }
+
+        let ids: HashSet<i32> = inners.iter().map(|inner| inner.get_box_id()).collect();
+        assert_eq!(ids.len(), 3, "box ids should be unique");
+
+        for inner in inners {
+            tool.destroy_inner(&inner).await.expect("destroy inner");
+        }
+
+        assert_eq!(tool.get_box_id_pool_len(), initial_pool_len + 3);
+
+        let reused = tool.build_inner().await.expect("build inner");
+        assert!(
+            ids.contains(&reused.get_box_id()),
+            "expected a reused box id from the pool"
+        );
+        tool.destroy_inner(&reused).await.expect("destroy inner");
+    }
+}

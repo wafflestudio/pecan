@@ -328,3 +328,62 @@ impl SandboxManager {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::SandboxManager;
+
+    #[tokio::test]
+    async fn manager_starts_empty_with_zero_prewarm() {
+        let manager = SandboxManager::new(0).await.expect("manager init");
+
+        assert_eq!(manager.available_sandboxes_count().await, 0);
+        assert_eq!(manager.idle_sandboxes_count().await, 0);
+        assert_eq!(manager.running_sandboxes_count().await, 0);
+        assert_eq!(manager.error_sandboxes_count().await, 0);
+        assert!(manager.list_ids().is_empty());
+    }
+
+    #[tokio::test]
+    async fn manager_prewarm_creates_idle_sandboxes() {
+        let manager = SandboxManager::new(2).await.expect("manager init");
+
+        assert_eq!(manager.available_sandboxes_count().await, 2);
+        assert_eq!(manager.idle_sandboxes_count().await, 2);
+        assert_eq!(manager.running_sandboxes_count().await, 0);
+        assert_eq!(manager.error_sandboxes_count().await, 0);
+        assert_eq!(manager.list_ids().len(), 2);
+    }
+
+    #[tokio::test]
+    async fn manager_adds_and_removes_many_sandboxes() {
+        let manager = SandboxManager::new(1).await.expect("manager init");
+
+        assert_eq!(manager.available_sandboxes_count().await, 1);
+        assert_eq!(manager.idle_sandboxes_count().await, 1);
+
+        manager
+            .add_new_prewarmed_sandbox(4)
+            .await
+            .expect("add prewarmed");
+        assert_eq!(manager.available_sandboxes_count().await, 5);
+        assert_eq!(manager.idle_sandboxes_count().await, 5);
+
+        manager.remove_idle_sandbox(3).await.expect("remove idle");
+        assert_eq!(manager.available_sandboxes_count().await, 2);
+        assert_eq!(manager.idle_sandboxes_count().await, 2);
+        assert_eq!(manager.list_ids().len(), 2);
+
+        manager
+            .add_new_prewarmed_sandbox(2)
+            .await
+            .expect("add prewarmed");
+        assert_eq!(manager.available_sandboxes_count().await, 4);
+        assert_eq!(manager.idle_sandboxes_count().await, 4);
+
+        manager.remove_idle_sandbox(4).await.expect("remove idle");
+        assert_eq!(manager.available_sandboxes_count().await, 0);
+        assert_eq!(manager.idle_sandboxes_count().await, 0);
+        assert!(manager.list_ids().is_empty());
+    }
+}
