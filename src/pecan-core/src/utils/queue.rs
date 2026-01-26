@@ -136,3 +136,35 @@ pub enum TryPopError {
     Closed,
     Poisoned,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Queue, TryPopError, TryPushError};
+
+    #[test]
+    fn try_push_and_try_pop_roundtrip() {
+        let queue = Queue::bounded(2);
+
+        assert!(matches!(queue.try_pop(), Err(TryPopError::Empty)));
+        assert!(queue.try_push(10).is_ok());
+        assert!(queue.try_push(20).is_ok());
+
+        assert_eq!(queue.len(), 2);
+        assert!(matches!(queue.try_push(30), Err(TryPushError::Full(30))));
+        assert!(matches!(queue.try_pop(), Ok(10)));
+        assert!(matches!(queue.try_pop(), Ok(20)));
+        assert!(matches!(queue.try_pop(), Err(TryPopError::Empty)));
+    }
+
+    #[test]
+    fn close_prevents_future_pushes() {
+        let queue = Queue::bounded(1);
+
+        queue.close();
+
+        assert!(queue.is_closed());
+        assert!(matches!(queue.try_push(1), Err(TryPushError::Closed(1))));
+        assert!(matches!(queue.push(2), Err(2)));
+        assert!(matches!(queue.try_pop(), Err(TryPopError::Closed)));
+    }
+}

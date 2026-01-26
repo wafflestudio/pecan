@@ -75,6 +75,30 @@ pub struct LanguageToolchain {
     pub runtime_option: RuntimeOption,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::Language;
+
+    #[test]
+    fn language_from_str_maps_known_values() {
+        assert!(matches!(Language::from("c"), Language::C));
+        assert!(matches!(Language::from("cpp"), Language::Cpp));
+        assert!(matches!(Language::from("go"), Language::Go));
+        assert!(matches!(Language::from("java"), Language::Java));
+        assert!(matches!(Language::from("kotlin"), Language::Kotlin));
+        assert!(matches!(Language::from("node"), Language::Node));
+        assert!(matches!(Language::from("python"), Language::Python));
+        assert!(matches!(Language::from("rust"), Language::Rust));
+        assert!(matches!(Language::from("typescript"), Language::Typescript));
+    }
+
+    #[test]
+    fn language_from_str_defaults_to_unknown() {
+        assert!(matches!(Language::from("elixir"), Language::Unknown));
+        assert!(matches!(Language::from(""), Language::Unknown));
+    }
+}
+
 #[macro_export]
 macro_rules! define_language_toolchain_dir_default {
     ($name:ident, $language:expr) => {
