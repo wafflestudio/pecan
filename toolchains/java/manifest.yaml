@@ -8,8 +8,8 @@ install_prefix: "/opt/toolchains/java/17"
 artifact_template:
   url: "https://corretto.aws/downloads/latest/amazon-corretto-{{version}}-{{java_arch}}-{{os}}-jdk.tar.gz"
   sha256_by_arch:
-    x64: "ce991faba33be89046b03518e2c971f892a279570bc09f700b363282db1ac552"
-    aarch64: "31b08051e647044da8ea201744becdbc76e05b807d45e68636f765e15fd830ae"
+    x64: "87411b0792a0f2b8e0fef1178c012bfe338b5f5fedb8c1e7985213cb7f790428"
+    aarch64: "dd6da079227bcc69894d01f256fe3397485d312122c9c7c14e43784cb5983924"
 
 binaries:
   - "bin/java"
@@ -19,7 +19,7 @@ set_default: true
 alternatives:
   name: java
   links:
-    java:  "bin/java"
+    java: "bin/java"
     javac: "bin/javac"
 
 runtime_env:
