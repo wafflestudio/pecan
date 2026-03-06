@@ -180,74 +180,94 @@ Toolchains are installed to `/opt/toolchains/<language>/<version>` with a `curre
 
 ## CI/CD with GitHub Actions
 
-### Build and Test Workflow
+This repository currently ships a single workflow, `build-and-push-ghcr`, that builds the production image and publishes it to GitHub Container Registry (GHCR).
 
-```yaml
-name: CI
+### Workflow Summary (actual)
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+- **Triggers**
+  - `pull_request`: build only (no push)
+  - `push` to `main`: build + push
+  - `push` tags matching `v*`: build + push (release)
+  - `workflow_dispatch`: manual build (supports selecting a Dockerfile under `./docker/`)
+- **Permissions**
+  - `contents: read`
+  - `packages: write` (needed to push to GHCR)
+- **Image tags**
+  - Semantic version from tags like `v0.1.0` → `:0.1.0`
+  - Git SHA tag → `:sha-<shortsha>`
+  - Branch tag (e.g. `main`) → `:main`
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: 1.86.0
-          components: clippy, rustfmt
-      
-      - name: Check formatting
-        run: cargo +nightly fmt --all -- --check
-      
-      - name: Lint
-        run: cargo clippy --all-targets --all-features -- -D warnings
-      
-      - name: Build
-        run: cargo build --release -p pecan-api
-      
-      - name: Run tests
-        run: cargo test --workspace
+### Typical Release Flow
+
+1. Develop on `feature/*`, then open a PR and merge into `main`.
+2. Create and push a version tag:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
-### Docker Build and Push
+This triggers the workflow and publishes `ghcr.io/<owner>/<repo>:0.1.0` (plus additional tags like `:sha-...`).
+
+### `build-and-push-ghcr.yml` (excerpt)
 
 ```yaml
-name: Docker
+name: build-and-push-ghcr
 
 on:
   push:
-    tags: ['v*']
+    branches: ["main"]
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      dockerfile:
+        description: "Dockerfile name under ./docker (e.g. isolate.Dockerfile)"
+        required: true
+        default: "isolate.Dockerfile"
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
-      - name: Login to Registry
+
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Build and push
-        uses: docker/build-push-action@v5
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha
+            type=ref,event=branch
+
+      - name: Build (and push on main)
+        uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-          platforms: linux/amd64,linux/arm64
+          file: ${{ github.event_name == 'workflow_dispatch' && format('./docker/{0}', inputs.dockerfile) || './docker/isolate.Dockerfile' }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 ```
 
 ## Health Checks
