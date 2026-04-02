@@ -11,4 +11,4 @@ tokio.workspace = true
 tokio-util = "0.7"
 thiserror.workspace = true
 uuid.workspace = true
-pecan-sandbox = { path = "../pecan-sandbox" }
+pecan-sandbox = { path = "../pecan-sandbox", default-features = false }

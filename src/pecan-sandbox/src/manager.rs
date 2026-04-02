@@ -143,7 +143,7 @@ impl SandboxManager {
         if let Some(compile_options) = &options.compile_options {
             let compile_cmd = Command::new(&compile_options.compiler_path)
                 .args(&compile_options.args)
-                .envs(compile_options.env.clone().unwrap_or_default())
+                .envs(compile_options.env.iter().flatten())
                 .current_dir(sb.inner.get_path())
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
@@ -240,8 +240,9 @@ impl SandboxManager {
     }
 
     pub async fn add_new_prewarmed_sandbox(&self, num: usize) -> Result<(), SandboxManagerError> {
-        let target_num = num
-            .min(MAX_PREWARMED_SANDBOXES.get().unwrap() - self.available_sandboxes_count().await);
+        let target_num = num.min(
+            MAX_PREWARMED_SANDBOXES.get_or_init(|| 1000) - self.available_sandboxes_count().await,
+        );
 
         for _ in 0..target_num {
             let sb = create_sandbox(&self.tool)

@@ -6,6 +6,9 @@ rust-version.workspace = true
 readme.workspace = true
 license.workspace = true
 
+[build-dependencies]
+cfg_aliases = "0.2"
+
 [dependencies]
 uuid.workspace = true
 tokio-util = "0.7"
@@ -15,8 +18,7 @@ dashmap = "6.1.0"
 futures = "0.3.31"
 
 [features]
-default = ["isolate"]
+default = ["isolate", "isolate-cg"]
 isolate = []
 isolate-cg = []
-
 nsjail = []

@@ -30,10 +30,11 @@ impl IntoResponse for APIError {
 
 #[cfg(test)]
 mod tests {
-    use super::APIError;
     use axum::body::to_bytes;
     use axum::response::IntoResponse;
     use http::StatusCode;
+
+    use super::APIError;
 
     #[tokio::test]
     async fn into_response_returns_json_error_body() {

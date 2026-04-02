@@ -7,12 +7,14 @@ use crate::application::state::AppState;
 pub async fn run() {
     let config = config::load_config();
 
-    let service = pecan_core::init(
-        config.service.max_queue_size,
-        config.service.max_concurrent_executions,
-    )
-    .await
-    .unwrap();
+    let service = Arc::new(
+        pecan_core::init(
+            config.service.max_queue_size,
+            config.service.max_concurrent_executions,
+        )
+        .await
+        .unwrap(),
+    );
 
     let shared_state = Arc::new(AppState {
         config,

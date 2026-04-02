@@ -101,14 +101,14 @@ pub fn build_sandbox_execution_option(
         None => None,
     };
 
-    return Ok(SandboxExecutionOptions {
-        additional_file_options: additional_file_options,
-        compile_options: compile_options,
-        additional_directory_options: additional_directory_options,
+    Ok(SandboxExecutionOptions {
+        additional_file_options,
+        compile_options,
+        additional_directory_options,
         binary_path: language_toolchain.runtime_option.binary_path,
         args: language_toolchain.runtime_option.args,
-        stdin: stdin,
+        stdin,
         time_limit: timeout,
         memory_limit: memory_limit,
-    });
+    })
 }

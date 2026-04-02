@@ -19,10 +19,13 @@ pub async fn judge(request: JudgeRequest, state: &SharedState) -> Result<JudgeRe
         .map_err(|e| APIError::InternalError(e.to_string()))?;
 
     let status = match result.status {
-        CodeExecutionStatus::Success => match result.stdout == request.desired_stdout {
-            true => JudgeStatus::Accepted,
-            false => JudgeStatus::WrongAnswer,
-        },
+        CodeExecutionStatus::Success => {
+            if result.stdout == request.desired_stdout {
+                JudgeStatus::Accepted
+            } else {
+                JudgeStatus::WrongAnswer
+            }
+        }
         CodeExecutionStatus::CompileError => JudgeStatus::CompileError,
         CodeExecutionStatus::RuntimeError => JudgeStatus::RuntimeError,
         CodeExecutionStatus::TimeLimitExceeded => JudgeStatus::TimeLimitExceeded,

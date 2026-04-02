@@ -84,44 +84,6 @@ pub async fn test_sandbox_manager() {
         memory_limit: 2048000.0,
     });
 
-    //     let opt = Arc::new(SandboxExecutionOptions {
-    //         compile_options: Some(CompileOptions {
-    //             compiler_path: PathBuf::from("/opt/toolchains/rust/current/bin/rustc"),
-    //             compiler_args: vec!["-o".to_string(), "main".to_string(), "main.rs".to_string()],
-    //         }),
-    //         additional_file_options: Some(
-    //             vec![SandboxAdditionalFileOptions {
-    //                 file_name: "main.rs".to_string(),
-    //                 file_content: r#"
-    //                     fn main() {
-    // 	let mut input = String::new();
-    // 	std::io::stdin().read_line(&mut input).unwrap();
-    // 	let N: i32 = input.trim().parse().unwrap();
-    // 	let mut inputs = Vec::new();
-    // 	for _ in 0..N {
-    // 		let mut input = String::new();
-    // 		std::io::stdin().read_line(&mut input).unwrap();
-    // 		inputs.push(input.trim().parse().unwrap());
-    // 	}
-    // 	let sum: i32 = inputs.iter().sum();
-    // 	println!("{}", sum);
-    // }
-    //                 "#.to_string(),
-    //             }],
-    //         ),
-    //         additional_directory_options: Some(
-    //             vec![SandboxAdditionalDirectoryOptions {
-    //                 directory_path: PathBuf::from("/opt/toolchains/rust/current"),
-    //                 mount_point: PathBuf::from("/opt/rust"),
-    //             }],
-    //         ),
-    //         binary_path: PathBuf::from("./main"),
-    //         args: vec![],
-    //         stdin: "4\n1\n2\n3\n10000".to_string(),
-    //         time_limit: 4.0,
-    //         memory_limit: 5000000.0,
-    //     });
-
     let mut futs = FuturesUnordered::new();
     for _ in 0..1 {
         let mgr = _manager.clone();
@@ -139,9 +101,7 @@ pub async fn test_sandbox_manager() {
     // wait until keyboard interrupt
     tokio::signal::ctrl_c().await.unwrap();
 
-    println!("Teardown...");
     _manager.teardown().await.unwrap();
     cancel_token.cancel();
     let _ = _loop_handle.await;
-    println!("Teardown done");
 }
