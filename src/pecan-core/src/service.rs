@@ -29,7 +29,7 @@ pub struct ServiceSpec {
 }
 
 impl Service {
-    pub async fn new(spec: ServiceSpec) -> Result<Arc<Self>, CoreServiceError> {
+    pub async fn new(spec: ServiceSpec) -> Result<Self, CoreServiceError> {
         let ServiceSpec {
             enable_bg_worker_loop,
             max_queue_size,
@@ -57,11 +57,11 @@ impl Service {
             None
         };
 
-        Ok(Arc::new(Self {
+        Ok(Self {
             task_queue,
             sandbox_manager,
             service_loop,
-        }))
+        })
     }
 
     pub async fn get_available_sandboxes_count(&self) -> usize {

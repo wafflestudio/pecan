@@ -1,4 +1,5 @@
 use pecan_api::application;
+use pecan_core::SANDBOX_SOLUTION;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
@@ -18,6 +19,7 @@ async fn main() {
         .init();
 
     tracing::info!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+    tracing::info!("Sandbox solution: {}", SANDBOX_SOLUTION);
 
     application::app::run().await;
 }

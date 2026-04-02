@@ -53,7 +53,7 @@ pub async fn execute(
         Err(e) => return Err(CoreExecutionError::InternalError(e.to_string())),
     };
 
-    return Ok(CodeExecutionResult {
+    Ok(CodeExecutionResult {
         status: match result.status {
             SandboxExecutionStatus::Success => CodeExecutionStatus::Success,
             SandboxExecutionStatus::CompileError => CodeExecutionStatus::CompileError,
@@ -65,5 +65,5 @@ pub async fn execute(
         stderr: result.stderr,
         time: result.time,
         memory: result.memory,
-    });
+    })
 }

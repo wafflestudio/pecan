@@ -2,7 +2,7 @@
 //!
 //! check [Isolate](https://github.com/ioi/isolate) for more details.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::str::FromStr;
 use std::sync::Mutex;
@@ -15,7 +15,7 @@ use crate::sandbox::{SandboxExecutionOptions, SandboxExecutionResult, SandboxExe
 use crate::tools::common::ISandboxTool;
 use crate::tools::errors::SandboxToolError;
 
-const PROGRAM_NAME: &'static str = "isolate";
+const PROGRAM_NAME: &str = "isolate";
 
 pub struct SandboxToolIsolate {
     box_id_counter: AtomicI32,
@@ -56,7 +56,7 @@ impl SandboxToolIsolate {
 
     pub async fn create_isolate_box(&self, box_id: i32) -> Result<IsolateInner, SandboxToolError> {
         let mut base_cmd = Command::new(PROGRAM_NAME);
-        if cfg!(feature = "isolate-cg") {
+        if cfg!(sandbox_isolate_cg) {
             base_cmd.arg("--cg");
         }
 
@@ -80,7 +80,7 @@ impl SandboxToolIsolate {
 
     pub async fn destroy_isolate_box(&self, box_id: i32) -> Result<(), SandboxToolError> {
         let mut base_cmd = Command::new(PROGRAM_NAME);
-        if cfg!(feature = "isolate-cg") {
+        if cfg!(sandbox_isolate_cg) {
             base_cmd.arg("--cg");
         }
 
@@ -133,7 +133,7 @@ impl ISandboxTool for SandboxToolIsolate {
             .await?;
 
         let mut base_cmd = Command::new(PROGRAM_NAME);
-        if cfg!(feature = "isolate-cg") {
+        if cfg!(sandbox_isolate_cg) {
             base_cmd
                 .arg("--cg")
                 .arg(format!("--cg-mem={}", options.memory_limit));
@@ -163,13 +163,7 @@ impl ISandboxTool for SandboxToolIsolate {
             .arg(options.binary_path.to_str().ok_or_else(|| {
                 SandboxToolError::UnknownError("Invalid binary path encoding".to_string())
             })?)
-            .args(
-                options
-                    .args
-                    .iter()
-                    .map(|arg| arg.as_str())
-                    .collect::<Vec<&str>>(),
-            );
+            .args(&options.args);
 
         let base_cmd_child = base_cmd
             .stdin(Stdio::piped())
@@ -225,7 +219,7 @@ impl ISandboxTool for SandboxToolIsolate {
             stdout,
             stderr,
             time: meta_time,
-            memory: match cfg!(feature = "isolate-cg") {
+            memory: match cfg!(sandbox_isolate_cg) {
                 true => meta_cg_mem as f64,
                 false => meta_mem as f64,
             },
@@ -253,7 +247,7 @@ impl ISandboxTool for SandboxToolIsolate {
         let path = inner.path.join(file_name);
         let content = read(path)
             .await
-            .map_err(|e| SandboxToolError::UnknownError(e.to_string()))?;
+            .map_err(|e| SandboxToolError::FileOperationFailed(e.to_string()))?;
         Ok(String::from_utf8_lossy(&content).to_string())
     }
 
@@ -265,7 +259,7 @@ impl ISandboxTool for SandboxToolIsolate {
         let path = inner.path.join(file_name);
         remove_file(path)
             .await
-            .map_err(|e| SandboxToolError::UnknownError(e.to_string()))?;
+            .map_err(|e| SandboxToolError::FileOperationFailed(e.to_string()))?;
         Ok(())
     }
 }
@@ -285,7 +279,7 @@ impl IsolateInner {
         self.box_id
     }
 
-    pub fn get_path(&self) -> &PathBuf {
+    pub fn get_path(&self) -> &Path {
         &self.path
     }
 }
@@ -302,10 +296,12 @@ fn parse_meta_file<S: FromStr>(content: &str, key: &str, default: S) -> S {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
+    use tokio::process::Command;
+
     use super::SandboxToolIsolate;
     use crate::tools::common::ISandboxTool;
-    use std::collections::HashSet;
-    use tokio::process::Command;
 
     #[tokio::test]
     async fn isolate_build_and_destroy_releases_box_id() {

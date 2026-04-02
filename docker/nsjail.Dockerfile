@@ -51,17 +51,6 @@ FROM toolchain-base AS toolchain-builder-typescript
 COPY toolchains/typescript/ /toolchains/typescript/
 RUN ./install.sh typescript/manifest.yaml
 
-# --- build isolate ---
-FROM debian:12.6-slim AS isolate-builder
-
-RUN apt-get update && apt-get --no-install-recommends install -y \
-    git build-essential pkg-config libcap-dev
-RUN git config --global http.sslVerify false
-RUN git clone --depth 1 --branch v2.0 https://github.com/ioi/isolate.git /usr/src/isolate
-WORKDIR /usr/src/isolate
-RUN make isolate
-
-
 # --- build pecan ---
 FROM rust:1.86.0-slim AS pecan-builder
 
@@ -70,14 +59,16 @@ RUN apt-get update && apt-get --no-install-recommends install -y \
 
 WORKDIR /usr/src/pecan
 COPY . .
-RUN cargo build --workspace --release --no-default-features --features "isolate"
+RUN cargo build --workspace --release --no-default-features --features "nsjail"
 
 
 # --- build runner ---
 FROM debian:12.6-slim AS runner
 
 RUN apt-get update && apt-get --no-install-recommends install -y \
-    gcc libc6-dev g++ && apt-get clean && rm -rf /var/lib/apt/lists/*
+    gcc libc6-dev g++ \
+    autoconf bison flex git libprotobuf-dev libnl-route-3-dev libtool make pkg-config protobuf-compiler \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # copy toolchains
 COPY --from=toolchain-builder-c /opt/toolchains/c/current /opt/toolchains/c/current
@@ -90,13 +81,14 @@ COPY --from=toolchain-builder-python /opt/toolchains/python/current /opt/toolcha
 COPY --from=toolchain-builder-rust /opt/toolchains/rust/current /opt/toolchains/rust/current
 COPY --from=toolchain-builder-typescript /opt/toolchains/typescript/current /opt/toolchains/typescript/current
 
-# copy isolate
-COPY --from=isolate-builder /usr/src/isolate/isolate /usr/local/bin/isolate
-COPY --from=isolate-builder /usr/src/isolate/isolate-check-environment /usr/local/bin/isolate-check-environment
-# COPY --from=isolate-builder /usr/src/isolate/default.cf /usr/local/etc/isolate
+# build nsjail
+RUN git config --global http.sslVerify false
+RUN git clone https://github.com/google/nsjail.git /usr/src/nsjail
+WORKDIR /usr/src/nsjail
+RUN make
+RUN cp nsjail /usr/local/bin/nsjail
 
-COPY static/isolate/default.cf /usr/local/etc/isolate
-COPY static/isolate/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY static/nsjail/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # copy pecan
