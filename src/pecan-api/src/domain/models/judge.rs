@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 pub type JudgeStatusCode = u16;
 
@@ -38,6 +39,17 @@ pub struct JudgeRequest {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct JudgeAsyncRequest {
+    pub code: String,
+    pub language: String,
+    pub stdin: String,
+    pub desired_stdout: String,
+    pub time_limit: f64,
+    pub memory_limit: f64,
+    pub webhook_url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct JudgeResponse {
     pub code: JudgeStatusCode,
     pub status: JudgeStatus,
@@ -45,4 +57,15 @@ pub struct JudgeResponse {
     pub stderr: String,
     pub time: f64,
     pub memory: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct JudgeAsyncResponse {
+    pub request_id: Uuid,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct JudgeAsyncWebhookResponse {
+    pub request_id: Uuid,
+    pub res: JudgeResponse,
 }

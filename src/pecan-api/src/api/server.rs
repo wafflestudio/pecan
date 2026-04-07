@@ -5,13 +5,17 @@ use std::sync::Arc;
 use axum::Router;
 use axum::response::IntoResponse;
 use axum::routing::get;
+use pecan_core::code_execution::AsyncCodeExecutionResult;
 use tokio::net::TcpListener;
+use tokio::sync::mpsc::Receiver;
+use tokio_util::sync::CancellationToken;
 use tower_http::cors::{Any, CorsLayer};
 
+use crate::api::handler::webhook_handler;
 use crate::api::routes::{judge_routes, manager_routes};
 use crate::application::state::SharedState;
 
-pub async fn start(state: SharedState) {
+pub async fn start(state: SharedState, webhook_rx: Receiver<AsyncCodeExecutionResult>) {
     let cors_layer = CorsLayer::new().allow_origin(Any);
 
     let router = Router::new()
@@ -44,6 +48,22 @@ pub async fn start(state: SharedState) {
         tracing::info!("\nShutdown signal received, starting graceful shutdown...");
     };
 
+    let cancel_token = CancellationToken::new();
+
+    let task_loop_token = cancel_token.child_token();
+    let task_loop_service = Arc::clone(&state.service);
+
+    let webhook_token = cancel_token.child_token();
+
+    tracing::info!("Spawning background services...");
+    tokio::spawn(async move {
+        webhook_handler::webhook_handler_loop(webhook_rx, webhook_token).await;
+    });
+
+    tokio::spawn(async move {
+        task_loop_service.run_task_loop(task_loop_token).await;
+    });
+
     let server = axum::serve(listener, router).with_graceful_shutdown(async {
         shutdown_signal.await;
     });
@@ -51,6 +71,8 @@ pub async fn start(state: SharedState) {
     if let Err(e) = server.await {
         tracing::error!("Server error: {}", e);
     }
+
+    cancel_token.cancel();
 
     tracing::info!("Cleaning up resources...");
     if let Err(e) = state.service.shutdown().await {

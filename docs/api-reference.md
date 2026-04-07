@@ -159,6 +159,96 @@ curl -X POST http://localhost:8080/v1/judge/judge-single \
 
 ---
 
+#### `POST /v1/judge/judge-single-async`
+
+Submit a code submission for asynchronous judging. The result is delivered to the specified `webhook_url` via a POST request once execution completes.
+
+**Request Body**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `code` | string | Yes | Source code to execute |
+| `language` | string | Yes | Programming language identifier |
+| `stdin` | string | Yes | Standard input for the program |
+| `desired_stdout` | string | Yes | Expected standard output |
+| `time_limit` | number | Yes | Time limit in seconds (e.g., 1.0) |
+| `memory_limit` | number | Yes | Memory limit in KB (e.g., 262144.0 for 256 MB) |
+| `webhook_url` | string | Yes | URL to receive the result via POST |
+
+**Response**
+
+- **Status Code**: `200 OK` — request accepted and queued
+- **Status Code**: `500 Internal Server Error` — queue full or internal error
+
+**Response Body**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `request_id` | string (UUID) | Unique identifier for tracking this submission |
+
+**Example Request**
+
+```bash
+curl -X POST http://localhost:8080/v1/judge/judge-single-async \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "#include <iostream>\nint main() { std::cout << \"Hello\"; return 0; }",
+    "language": "cpp",
+    "stdin": "",
+    "desired_stdout": "Hello",
+    "time_limit": 1.0,
+    "memory_limit": 262144.0,
+    "webhook_url": "http://localhost:9000"
+  }'
+```
+
+**Example Response**
+
+```json
+{
+  "request_id": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+---
+
+### Webhook Callback
+
+When an async judge submission finishes execution, the server sends a `POST` request to the `webhook_url` provided in the original request.
+
+**Webhook Payload**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `request_id` | string (UUID) | The same identifier returned by `judge-single-async` |
+| `res` | object | Judge result (same schema as `judge-single` response) |
+| `res.code` | number | Status code (0–6) |
+| `res.status` | string | Status enum value |
+| `res.stdout` | string | Actual standard output |
+| `res.stderr` | string | Standard error output |
+| `res.time` | number | Execution time in seconds |
+| `res.memory` | number | Memory usage in KB |
+
+**Example Webhook Payload**
+
+```json
+{
+  "request_id": "550e8400-e29b-41d4-a716-446655440000",
+  "res": {
+    "code": 0,
+    "status": "Accepted",
+    "stdout": "Hello",
+    "stderr": "",
+    "time": 0.05,
+    "memory": 12800.0
+  }
+}
+```
+
+> The webhook endpoint should respond with any `2xx` status code. The server currently does not retry on delivery failure.
+
+---
+
 ### Manager Endpoints
 
 #### `GET /v1/manager/sandbox-status`

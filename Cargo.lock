@@ -649,7 +649,7 @@ dependencies = [
 
 [[package]]
 name = "pecan-api"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
  "axum",
  "futures",
@@ -661,6 +661,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio",
+ "tokio-util",
  "tower-http",
  "tracing",
  "tracing-subscriber",
@@ -669,7 +670,7 @@ dependencies = [
 
 [[package]]
 name = "pecan-core"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
  "pecan-sandbox",
  "thiserror",
@@ -680,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "pecan-sandbox"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
  "cfg_aliases",
  "dashmap",
