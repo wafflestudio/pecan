@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use pecan_sandbox::manager::SandboxManager;
 use pecan_sandbox::sandbox::SandboxExecutionStatus;
+use uuid::Uuid;
 
 use crate::errors::CoreExecutionError;
 use crate::toolchains::Language;
@@ -13,6 +14,14 @@ pub struct CodeExecutionRequest {
     pub input: String,
     pub timeout: f64,
     pub memory_limit: f64,
+}
+
+pub struct CodeExecutionRequestLazy {
+    pub request_id: Uuid,
+    pub webhook_url: String,
+    pub send_failed_count: u32,
+    pub desired_stdout: String,
+    pub req: CodeExecutionRequest,
 }
 
 pub enum CodeExecutionStatus {
@@ -30,6 +39,14 @@ pub struct CodeExecutionResult {
     pub stderr: String,
     pub time: f64,
     pub memory: f64,
+}
+
+pub struct AsyncCodeExecutionResult {
+    pub request_id: Uuid,
+    pub webhook_url: String,
+    pub send_failed_count: u32,
+    pub desired_stdout: String,
+    pub result: Option<CodeExecutionResult>,
 }
 
 /// simply execute function provided by sandbox manager
