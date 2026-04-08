@@ -1,17 +1,15 @@
 # /toolchains/python/manifest.yaml
 
 language: python
-version: "3.12.7"
-method: build
-install_prefix: "/opt/toolchains/python/3.12.7"
+version: "3.12.13"
+method: tarball
+install_prefix: "/opt/toolchains/python/3.12.13"
 
-build:
-  url: "https://www.python.org/ftp/python/{{version}}/Python-{{version}}.tgz"
-  sha256: "73ac8fe780227bf371add8373c3079f42a0dc62deff8d612cd15a618082ab623"
-  configure_args:
-    - "--prefix={{install_prefix}}"
-    - "--enable-optimizations"
-    - "--with-lto"
+artifact_template:
+  url: "https://github.com/indygreg/python-build-standalone/releases/download/20260408/cpython-{{version}}+20260408-{{python_arch}}-install_only.tar.gz"
+  sha256_by_arch:
+    x86_64-unknown-linux-gnu: "cc29edea7153531b0830f42229fb35b5aac7928e55dc3f58cfdd7c3bc097402d"
+    aarch64-unknown-linux-gnu: "05bfb8ccaa6cce0cbede6a4742b19f31214858fac27cc88de19839e585ec910e"
 
 binaries:
   - "bin/python3"

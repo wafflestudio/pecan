@@ -7,7 +7,7 @@ use crate::toolchains::{DirMountOption, LanguageToolchain, RuntimeOption};
 use crate::{define_language_toolchain_dir_default, define_mount_point_default};
 
 pub const PYTHON_LANGUAGE: &str = "python";
-pub const PYTHON_VERSION: &str = "3.12.7";
+pub const PYTHON_VERSION: &str = "3.12.13";
 pub const PYTHON_BIN: &str = "bin/python3";
 define_language_toolchain_dir_default!(PYTHON_DIR, "python");
 define_mount_point_default!(PYTHON_MOUNT_POINT, "python");
