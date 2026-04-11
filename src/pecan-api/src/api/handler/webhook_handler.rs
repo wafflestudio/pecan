@@ -7,9 +7,10 @@ use tokio_util::sync::CancellationToken;
 use crate::api::error::APIError;
 use crate::domain::models::judge::{JudgeAsyncWebhookResponse, JudgeResponse, JudgeStatus};
 
-async fn send_webhook_request(res: AsyncCodeExecutionResult) -> Result<(), APIError> {
-    let client = Client::new();
-
+async fn send_webhook_request(
+    client: &Client,
+    res: AsyncCodeExecutionResult,
+) -> Result<(), APIError> {
     match res.result {
         Some(r) => {
             let status = match r.status {
@@ -58,6 +59,15 @@ pub async fn webhook_handler_loop(
     cancel: CancellationToken,
 ) {
     tracing::info!("Webhook handler loop started");
+    let client = Client::builder()
+        .connect_timeout(std::time::Duration::from_secs(2))
+        .timeout(std::time::Duration::from_secs(5))
+        .build()
+        .map_err(|e| {
+            tracing::error!("Failed to create webhook client: {}", e);
+            APIError::InternalError(e.to_string())
+        })
+        .unwrap();
 
     loop {
         select! {
@@ -73,7 +83,7 @@ pub async fn webhook_handler_loop(
                             request_id = %request_id,
                             "sending webhook request"
                         );
-                        match send_webhook_request(msg).await {
+                        match send_webhook_request(&client, msg).await {
                             Ok(_) => tracing::debug!(request_id = %request_id, "webhook delivered"),
                             Err(e) => tracing::error!(request_id = %request_id, error = %e, "webhook delivery failed"),
                         }
