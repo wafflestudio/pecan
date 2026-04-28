@@ -8,7 +8,7 @@ use std::time::Duration;
 use dashmap::DashMap;
 use tokio::process::Command;
 use tokio::sync::{Mutex, Semaphore, mpsc};
-use tokio::time::sleep;
+use tokio::time::{sleep, timeout};
 use tokio_util::sync::CancellationToken;
 use uuid::Uuid;
 
@@ -97,7 +97,13 @@ impl SandboxManager {
         &self,
         options: &SandboxExecutionOptions,
     ) -> Result<SandboxExecutionResult, SandboxManagerError> {
-        let _permit = self.permits.acquire().await.map_err(|e| {
+        let _permit = timeout(
+            Duration::from_secs_f64(options.time_limit),
+            self.permits.acquire(),
+        )
+        .await
+        .map_err(|_| SandboxManagerError::SemaphoreAcquireTimeout)?
+        .map_err(|e| {
             SandboxManagerError::SemaphoreClosed(format!("Semaphore acquisition failed: {}", e))
         })?;
 
@@ -148,13 +154,26 @@ impl SandboxManager {
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())
+                .kill_on_drop(true)
                 .spawn()
                 .map_err(|e| SandboxManagerError::CommandExecutionFailed(e.to_string()))?;
 
-            let compile_result = compile_cmd
-                .wait_with_output()
-                .await
-                .map_err(|e| SandboxManagerError::CommandExecutionFailed(e.to_string()))?;
+            let compile_result = match timeout(
+                Duration::from_secs_f64(options.compile_timeout),
+                compile_cmd.wait_with_output(),
+            )
+            .await
+            {
+                Ok(Ok(output)) => output,
+                Ok(Err(e)) => {
+                    sb.set_error();
+                    return Err(SandboxManagerError::CommandExecutionFailed(e.to_string()));
+                }
+                Err(_) => {
+                    sb.set_error();
+                    return Err(SandboxManagerError::CompileTimeout);
+                }
+            };
 
             if !compile_result.status.success() {
                 sb.set_idle();

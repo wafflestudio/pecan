@@ -26,4 +26,6 @@ pub enum CoreExecutionError {
     AllocatingTaskError(String),
     #[error("Internal error: {0}")]
     InternalError(String),
+    #[error("Service busy: {0}")]
+    ServiceBusy(String),
 }

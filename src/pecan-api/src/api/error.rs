@@ -20,11 +20,17 @@ pub enum APIError {
     AllocatingTaskError(String),
     #[error("Internal error: {0}")]
     InternalError(String),
+    #[error("Service busy: {0}")]
+    ServiceBusy(String),
 }
 
 impl IntoResponse for APIError {
     fn into_response(self) -> Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(self)).into_response()
+        let status = match &self {
+            APIError::ServiceBusy(_) => StatusCode::SERVICE_UNAVAILABLE,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+        (status, Json(self)).into_response()
     }
 }
 

@@ -29,4 +29,8 @@ pub enum SandboxManagerError {
     QueueFull(String),
     #[error("Sandbox execution failed: {0}")]
     ExecutionFailed(String),
+    #[error("Compile timed out")]
+    CompileTimeout,
+    #[error("Timed out waiting for available sandbox")]
+    SemaphoreAcquireTimeout,
 }

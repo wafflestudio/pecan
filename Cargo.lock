@@ -649,7 +649,7 @@ dependencies = [
 
 [[package]]
 name = "pecan-api"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "axum",
  "futures",
@@ -670,7 +670,7 @@ dependencies = [
 
 [[package]]
 name = "pecan-core"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "pecan-sandbox",
  "thiserror",
@@ -681,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "pecan-sandbox"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "cfg_aliases",
  "dashmap",

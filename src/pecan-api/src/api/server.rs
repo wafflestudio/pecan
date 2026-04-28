@@ -20,6 +20,7 @@ pub async fn start(state: SharedState, webhook_rx: Receiver<AsyncCodeExecutionRe
 
     let router = Router::new()
         .route("/v1/health", get(health_handler))
+        .route("/v1/version", get(version_handler))
         .nest("/v1/judge", judge_routes::routes())
         .nest("/v1/manager", manager_routes::routes())
         .with_state(Arc::clone(&state))
@@ -84,4 +85,8 @@ pub async fn start(state: SharedState, webhook_rx: Receiver<AsyncCodeExecutionRe
 
 pub async fn health_handler() -> impl IntoResponse {
     "OK"
+}
+
+pub async fn version_handler() -> impl IntoResponse {
+    format!("v{}", env!("CARGO_PKG_VERSION"))
 }
