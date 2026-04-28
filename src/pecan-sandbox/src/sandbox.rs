@@ -112,6 +112,8 @@ pub struct SandboxExecutionOptions {
     pub time_limit: f64,
     /// memory limit in kilobytes
     pub memory_limit: f64,
+    /// timeout for the compile phase in seconds
+    pub compile_timeout: f64,
 }
 
 /// Result of the sandbox execution.

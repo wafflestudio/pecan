@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use pecan_sandbox::errors::SandboxManagerError;
 use pecan_sandbox::manager::SandboxManager;
 use pecan_sandbox::sandbox::SandboxExecutionStatus;
 use uuid::Uuid;
@@ -67,6 +68,20 @@ pub async fn execute(
         .await
     {
         Ok(result) => result,
+        Err(SandboxManagerError::SemaphoreAcquireTimeout) => {
+            return Err(CoreExecutionError::ServiceBusy(
+                "Server is busy, please try again later".to_string(),
+            ));
+        }
+        Err(SandboxManagerError::CompileTimeout) => {
+            return Ok(CodeExecutionResult {
+                status: CodeExecutionStatus::CompileError,
+                stdout: String::new(),
+                stderr: "Compilation timed out".to_string(),
+                time: 0.0,
+                memory: 0.0,
+            });
+        }
         Err(e) => return Err(CoreExecutionError::InternalError(e.to_string())),
     };
 

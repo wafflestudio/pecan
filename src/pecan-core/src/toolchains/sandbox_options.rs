@@ -110,5 +110,6 @@ pub fn build_sandbox_execution_option(
         stdin,
         time_limit: timeout,
         memory_limit: memory_limit,
+        compile_timeout: timeout * 3.0,
     })
 }

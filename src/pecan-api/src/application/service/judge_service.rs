@@ -1,6 +1,7 @@
 use pecan_core::code_execution::{
     CodeExecutionRequest, CodeExecutionRequestLazy, CodeExecutionStatus,
 };
+use pecan_core::errors::CoreExecutionError;
 use uuid::Uuid;
 
 use crate::api::error::APIError;
@@ -21,7 +22,10 @@ pub async fn judge(request: JudgeRequest, state: &SharedState) -> Result<JudgeRe
             memory_limit: request.memory_limit,
         })
         .await
-        .map_err(|e| APIError::InternalError(e.to_string()))?;
+        .map_err(|e| match e {
+            CoreExecutionError::ServiceBusy(msg) => APIError::ServiceBusy(msg),
+            e => APIError::InternalError(e.to_string()),
+        })?;
 
     let status = match result.status {
         CodeExecutionStatus::Success => {

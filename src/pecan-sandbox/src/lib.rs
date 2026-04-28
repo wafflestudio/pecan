@@ -82,6 +82,7 @@ pub async fn test_sandbox_manager() {
         stdin: "5\n1\n2\n3\n4\n1011".to_string(),
         time_limit: 10.0,
         memory_limit: 2048000.0,
+        compile_timeout: 30.0,
     });
 
     let mut futs = FuturesUnordered::new();
