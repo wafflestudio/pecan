@@ -117,6 +117,7 @@ impl ISandboxTool for SandboxToolNsjail {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
+            .kill_on_drop(true)
             .spawn()
             .map_err(|e| SandboxToolError::UnknownError(e.to_string()))?;
 

@@ -109,7 +109,8 @@ pub fn build_sandbox_execution_option(
         args: language_toolchain.runtime_option.args,
         stdin,
         time_limit: timeout,
+        wall_time_limit: (timeout + 1.0) * 3.0,
         memory_limit: memory_limit,
-        compile_timeout: timeout * 3.0,
+        compile_timeout: (timeout * 3.0).max(10.0),
     })
 }

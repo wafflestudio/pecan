@@ -68,7 +68,8 @@ pub async fn execute(
         .await
     {
         Ok(result) => result,
-        Err(SandboxManagerError::SemaphoreAcquireTimeout) => {
+        Err(SandboxManagerError::SemaphoreAcquireTimeout)
+        | Err(SandboxManagerError::IdleQueueTimeout) => {
             return Err(CoreExecutionError::ServiceBusy(
                 "Server is busy, please try again later".to_string(),
             ));

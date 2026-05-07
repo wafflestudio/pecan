@@ -33,4 +33,6 @@ pub enum SandboxManagerError {
     CompileTimeout,
     #[error("Timed out waiting for available sandbox")]
     SemaphoreAcquireTimeout,
+    #[error("Timed out waiting for an idle sandbox from the queue")]
+    IdleQueueTimeout,
 }
