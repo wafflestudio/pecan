@@ -155,7 +155,7 @@ impl ISandboxTool for SandboxToolIsolate {
             .arg(format!("--box-id={}", inner.get_box_id()))
             .arg(format!("--processes={}", 128))
             .arg(format!("--time={}", options.time_limit))
-            .arg(format!("--wall-time={}", 100))
+            .arg(format!("--wall-time={}", options.wall_time_limit))
             .arg(format!("--stdin={}", stdin_file_name))
             .arg(format!("--meta={}", meta_file_path.to_string_lossy()))
             .arg("--run")
@@ -169,6 +169,7 @@ impl ISandboxTool for SandboxToolIsolate {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
+            .kill_on_drop(true)
             .spawn()
             .map_err(|e| SandboxToolError::UnknownError(e.to_string()))?;
 
